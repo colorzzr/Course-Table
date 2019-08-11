@@ -29,14 +29,28 @@ class Classic extends React.Component{
 		this.state = {
 			header: ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Firday'],
 			options:[],
-			course:[],
-			current_course_option:0
+			course:{
+				"fall":[],
+				"spring":[]
+			},
+			// current is option 0
+			current_course_option:0,
+			// default is winter
+			winter_or_sprint:"fall",
 		}
+
 
 		$.get('http://localhost:5000/get_tables',{}, (data)=>{
 			console.log(data)
 			this.setState({options:data['result']})
 		})
+
+	}
+
+	FSswitch(evnet, target){
+		const {winter_or_sprint} = this.state;
+		if(winter_or_sprint==='fall') this.setState({winter_or_sprint:"spring", current_course_option:0})
+		else this.setState({winter_or_sprint:"fall", current_course_option:0})
 	}
 
 	labelOnClick(evnet, target){
@@ -66,13 +80,23 @@ class Classic extends React.Component{
 	}
 
 	render(){
-		let {header, options, course, current_course_option} = this.state;
+		let {header, options, course, current_course_option, winter_or_sprint} = this.state;
 		let header_comp = []
 		for(let i = 0; i < header.length; i++){
-			header_comp.push(
-				<Table.HeaderCell>{header[i]}</Table.HeaderCell>
-			)
+			// add fall & sprinig switch
+			if(i === 0){
+				let temp = []
+				temp.push(<Button onClick={this.FSswitch.bind(this)} key="Fall">Fall</Button>)
+				temp.push(<Button onClick={this.FSswitch.bind(this)} key="Spring">Spring</Button>)
+				header_comp.push(<Table.HeaderCell>{temp}</Table.HeaderCell>)
+			}
+			else{
+				header_comp.push(
+					<Table.HeaderCell>{header[i]}</Table.HeaderCell>
+				)
+			}
 		}
+
 
 		let map = [];
 		// empty map
@@ -84,11 +108,13 @@ class Classic extends React.Component{
 		}
 
 		let buttons = []
-		if(course.length !== 0){
+		// get default semester schedual
+		let course_semester = course[winter_or_sprint]
+		if(course_semester.length !== 0){
 			// with the course map
-			for(let i = 0; i < course[0].length; i++){
+			for(let i = 0; i < course_semester[current_course_option].length; i++){
 				// console.log(course[current_course_option][i])
-				const {classname, weekday, start_time, end_time} = course[current_course_option][i]
+				const {classname, weekday, start_time, end_time} = course_semester[current_course_option][i]
 				for(let j = start_time - 9; j < end_time - 9; j ++){
 					const previous = map[j][weekday]
 					map[j][weekday] = classname + ' ' + previous;
@@ -96,7 +122,7 @@ class Classic extends React.Component{
 			}
 
 			// populating buttons
-			for(let i = 0; i < course[current_course_option].length; i++){
+			for(let i = 0; i < course_semester.length; i++){
 				buttons.push(<Button value={i} onClick={this.buttonOnClick.bind(this)}>{i}</Button>)
 			}
 		}
@@ -109,15 +135,25 @@ class Classic extends React.Component{
 				// if 0 it is time slot
 				if(j === 0){
 					temp.push(
-							<Table.Cell> {i+9} - {i+10}  o'clock</Table.Cell>
+							<Table.Cell style={{height: 100}}> {i+9} - {i+10}  o'clock</Table.Cell>
 					)
 				}
 				else{
 					let color = {backgroundColor:colorArray[used_color]}
-					temp.push(
+					if(map[i][j] !== ''){
+						temp.push(
 							// <Table.Cell style={color}>{map[i][j]}</Table.Cell>
-							<Table.Cell>{map[i][j]}</Table.Cell>
-					)
+							<Table.Cell style={{height: 100}}>
+								<Label>{map[i][j]}</Label>
+							</Table.Cell>
+						)
+					}
+					// push empty cell
+					else{
+						temp.push(
+							<Table.Cell style={{height: 100}}></Table.Cell>
+						)
+					}
 				}
 			}
 			table_comp.push(<Table.Row>
@@ -128,7 +164,7 @@ class Classic extends React.Component{
 
 		return(
 			<div>
-				<h1>HHHHHH</h1>
+				<h1>Course Table</h1>
 
 				<Dropdown
 				    placeholder='Select Friend'
@@ -142,7 +178,7 @@ class Classic extends React.Component{
 
 				{buttons}
 
-				<Table celled>
+				<Table celled fixed>
 			    <Table.Header>
 			      <Table.Row>
 			        {header_comp}
