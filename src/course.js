@@ -103,7 +103,7 @@ class Classic extends React.Component{
 		for(let i = 0; i < 12; i++){
 			map[i] = []
 			for(let j = 0; j < header.length; j++){
-				map[i].push('')
+				map[i].push([])
 			}
 		}
 
@@ -116,8 +116,8 @@ class Classic extends React.Component{
 				// console.log(course[current_course_option][i])
 				const {classname, weekday, start_time, end_time} = course_semester[current_course_option][i]
 				for(let j = start_time - 9; j < end_time - 9; j ++){
-					const previous = map[j][weekday]
-					map[j][weekday] = classname + ' ' + previous;
+					// const previous = map[j][weekday]
+					map[j][weekday].push(classname);
 				}
 			}
 
@@ -140,18 +140,23 @@ class Classic extends React.Component{
 				}
 				else{
 					let color = {backgroundColor:colorArray[used_color]}
-					if(map[i][j] !== ''){
+					if(map[i][j].length !== 0){
+						// looping over all to render the label
+						let labels = []
+						for(let k = 0; k < map[i][j].length; k++){
+							labels.push(<Label>{map[i][j][k]}</Label>)
+						}
+
 						temp.push(
 							// <Table.Cell style={color}>{map[i][j]}</Table.Cell>
-							<Table.Cell style={{height: 100}}>
-								<Label>{map[i][j]}</Label>
-							</Table.Cell>
+							// style={{height: 50}
+							<Table.Cell>{labels}</Table.Cell>
 						)
 					}
 					// push empty cell
 					else{
 						temp.push(
-							<Table.Cell style={{height: 100}}></Table.Cell>
+							<Table.Cell></Table.Cell>
 						)
 					}
 				}
