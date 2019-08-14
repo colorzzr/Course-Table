@@ -40,10 +40,10 @@ class Classic extends React.Component{
 		}
 
 
-		$.get('http://localhost:5000/get_tables',{}, (data)=>{
-			console.log(data)
-			this.setState({options:data['result']})
-		})
+		// $.get('http://localhost:5000/get_tables',{}, (data)=>{
+		// 	console.log(data)
+		// 	this.setState({options:data['result']})
+		// })
 
 	}
 
@@ -72,6 +72,14 @@ class Classic extends React.Component{
 				this.setState({course})
 			}
 		)
+	}
+
+	dropdownSearch(evnet, target){
+		// console.log(target.searchQuery)
+		$.get('http://localhost:5000/es_search',{input:target.searchQuery}, (data)=>{
+			console.log(data)
+			this.setState({options:data['result']})
+		})
 	}
 
 	buttonOnClick(evnet, target){
@@ -179,6 +187,7 @@ class Classic extends React.Component{
 				    fluid
 				    options={options}
 				    onChange = {this.labelOnClick.bind(this)}
+				    onSearchChange = {this.dropdownSearch.bind(this)}
 				  />
 
 				{buttons}
