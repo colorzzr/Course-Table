@@ -29,6 +29,7 @@ class Classic extends React.Component{
 		this.state = {
 			header: ['', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Firday'],
 			options:[],
+			dropdownSelect:[],
 			course:{
 				"fall":[],
 				"spring":[]
@@ -55,35 +56,62 @@ class Classic extends React.Component{
 
 	labelOnClick(evnet, target){
 		console.log(target.value)
+
 		let classname = {}
+		// let options = []
 		for(let i = 0; i < target.value.length; i++){
 			classname['classname'+i] = target.value[i]
+			// options.push({
+			// 	key:target.value[i],
+			// 	value:target.value[i],
+			// 	text:target.value[i]
+			// })
 		}
 
 		$.get('http://localhost:5000/get_data',
 			classname, 
 			(data)=>{
-				console.log(data)
+				// console.log(data)
 				if(data['result'] === false){
 					this.setState({course:[]})
 				}
+
+				// if we got it remove the four elase
+
+
 				// append result
 				let course = data['result']
-				this.setState({course})
+				this.setState({course, dropdownSelect:target.value})
 			}
 		)
 	}
 
 	dropdownSearch(evnet, target){
-		// console.log(target.searchQuery)
+		// console.log(target)
 		$.get('http://localhost:5000/es_search',{input:target.searchQuery}, (data)=>{
 			console.log(data)
-			this.setState({options:data['result']})
+
+			//here we pop the last 5
+			let {dropdownSelect} = this.state;
+			let options = [];
+			for(let i = 0; i < dropdownSelect.length; i++){
+				options.push({
+					key:dropdownSelect[i],
+					value:dropdownSelect[i],
+					text:dropdownSelect[i]
+				})
+			}
+
+			// append the array
+			options = options.concat(data['result'])
+			console.log(options)
+
+			this.setState({options})
 		})
 	}
 
 	buttonOnClick(evnet, target){
-		console.log(target)
+		// console.log(target)
 		this.setState({current_course_option:parseInt(target.value)})
 	}
 
